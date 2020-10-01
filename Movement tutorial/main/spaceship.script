@@ -1,0 +1,63 @@
+
+-- initialize the game
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.velocity = vmath.vector3() 
+	self.input = vmath.vector3()  
+end
+
+-- Each frame the Defold engine calls the update() function 
+-- of each script. A Defold game usually runs at 60 frames per second,
+-- so each frame is 0.016666 seconds long. That is the time elapsed
+-- between each call to update()
+
+-- update player position
+-- the units of velocity is expressed in pixels/frame
+function update(self, dt)
+
+	local acceleration = self.input * 200
+
+	-- First, the input vector has length 1 
+	-- if you move vertically or horizontally, 
+	-- but diagonally the length is 1.4142 (square root of 2) 
+	-- so diagonal movement is faster. You probably don't want that.
+	
+	-- here we verify if in diagonal is faster than 1 
+	-- and put 1 on diagonal speed
+	
+	if vmath.length_sqr(self.input) > 1 then
+		self.input = vmath.normalize(self.input)
+	end
+	
+	-- argument  dt is "delta time" and its value is the 
+	-- number of seconds that elapsed since the last frame.
+	local dv = acceleration * dt
+	local v0 = self.velocity
+	local v1 = self.velocity + dv
+	local movement = (v0 + v1) * dt * 0.5
+	
+	local p = go.get_position()
+	go.set_position(p + movement)
+	self.velocity = v1
+	self.input = vmath.vector3()
+	
+end
+
+-- receive action_id from game.input_binding 
+function on_input(self, action_id, action)
+	if action_id == hash("up") then
+		print("UP!")
+		self.input.y = 1 
+	elseif action_id == hash("down") then
+		print("DOWN!")
+		self.input.y = -1 
+	elseif action_id == hash("left") then
+		print("LEFT!")
+		self.input.x = -1 
+	elseif action_id == hash("right") then
+		print("RIGHT!")
+		self.input.x = 1 
+	elseif action_id == hash("click") and action.pressed then
+		print("CLICK!")
+	end
+end
